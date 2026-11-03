@@ -150,3 +150,166 @@ function loop() {
 }
 
 requestAnimationFrame(loop);
+/**
+ * DESIGN: Ayarlanabilir parametreler, kural ve ses ayarları
+ */
+const DESIGN = {
+    chargeRate: 1.2,
+    decayRate: 1.8,
+    thresholdWarning: 70,
+    maxLimit: 100,
+    baseColor: "#1f2229",
+    warningColor: "#f29900",
+    dangerColor: "#d93025"
+};
+
+let state = {
+    loadLevel: 0,
+    isHolding: false,
+    isOverloaded: false,
+    numericMode: false
+};
+
+// Web Audio API için ses motoru hazırlığı (Sound Generator)
+let audioCtx = null;
+
+function playTone(freq, type = 'sine', duration = 0.1) {
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = type;
+        osc.frequency.value = freq;
+        
+        gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+        // Tarayıcı ses politikası engellerse sessizce devam et
+    }
+}
+
+const targetElement = document.getElementById('pulse-target');
+const feedbackText = document.getElementById('feedback-text');
+const numericDisplay = document.getElementById('numeric-display');
+const loadValueSpan = document.getElementById('load-value');
+const modeToggle = document.getElementById('mode-toggle');
+const resetBtn = document.getElementById('reset-btn');
+
+function startHolding(e) {
+    if (e.type === 'keydown' && e.code !== 'Space') return;
+    e.preventDefault();
+    if (!state.isOverloaded) {
+        state.isHolding = true;
+    }
+}
+
+function stopHolding(e) {
+    if (e.type === 'keyup' && e.code !== 'Space') return;
+    state.isHolding = false;
+}
+
+targetElement.addEventListener('mousedown', startHolding);
+window.addEventListener('mouseup', stopHolding);
+
+targetElement.addEventListener('touchstart', (e) => { startHolding(e); });
+window.addEventListener('touchend', stopHolding);
+
+window.addEventListener('keydown', startHolding);
+window.addEventListener('keyup', stopHolding);
+
+modeToggle.addEventListener('change', (e) => {
+    state.numericMode = e.target.checked;
+    numericDisplay.classList.toggle('hidden', !state.numericMode);
+});
+
+resetBtn.addEventListener('click', resetSystem);
+
+function resetSystem() {
+    state.loadLevel = 0;
+    state.isHolding = false;
+    state.isOverloaded = false;
+    targetElement.classList.remove('shaking');
+    feedbackText.textContent = "HOLD";
+    targetElement.style.borderColor = "#3c4043";
+    targetElement.style.backgroundColor = DESIGN.baseColor;
+    playTone(300, 'triangle', 0.2); // Sıfırlama sesi
+}
+
+function updateRule() {
+    if (state.isOverloaded) return;
+
+    if (state.isHolding) {
+        state.loadLevel += DESIGN.chargeRate;
+        
+        // Dolum sırasında hafif tıklama/bip sesleri (Load feedback sound)
+        if (Math.floor(state.loadLevel) % 15 === 0) {
+            playTone(200 + (state.loadLevel * 4), 'sine', 0.05);
+        }
+
+        if (state.loadLevel >= DESIGN.maxLimit) {
+            state.loadLevel = DESIGN.maxLimit;
+            state.isOverloaded = true;
+            playTone(100, 'sawtooth', 0.5); // Patlama / Aşırı yüklenme sesi
+        }
+    } else {
+        state.loadLevel -= DESIGN.decayRate;
+        if (state.loadLevel < 0) {
+            state.loadLevel = 0;
+        }
+    }
+
+    updateOutput();
+}
+
+function updateOutput() {
+    if (state.numericMode) {
+        loadValueSpan.textContent = Math.round(state.loadLevel);
+    }
+
+    if (state.isOverloaded) {
+        feedbackText.textContent = "OVERLOAD!";
+        targetElement.style.backgroundColor = DESIGN.dangerColor;
+        targetElement.style.borderColor = "#ffffff";
+        targetElement.classList.add('shaking');
+        return;
+    }
+
+    if (state.loadLevel >= DESIGN.thresholdWarning) {
+        feedbackText.textContent = "HOLD...";
+        targetElement.style.backgroundColor = DESIGN.warningColor;
+        targetElement.style.borderColor = "#ffffff";
+        targetElement.classList.add('shaking');
+    } else if (state.loadLevel > 0) {
+        feedbackText.textContent = "CHARGING";
+        targetElement.style.backgroundColor = DESIGN.baseColor;
+        targetElement.style.borderColor = "#8ab4f8";
+        targetElement.classList.remove('shaking');
+    } else {
+        feedbackText.textContent = "HOLD";
+        targetElement.style.backgroundColor = DESIGN.baseColor;
+        targetElement.style.borderColor = "#3c4043";
+        targetElement.classList.remove('shaking');
+    }
+
+    const scaleFactor = 1 + (state.loadLevel / 300);
+    targetElement.style.transform = `scale(${scaleFactor})`;
+}
+
+function loop() {
+    updateRule();
+    requestAnimationFrame(loop);
+}
+
+requestAnimationFrame(loop);
