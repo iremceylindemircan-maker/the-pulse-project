@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Pulse - Feedback Experiment</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <h1>THE PULSE</h1>
+        <p class="instruction">Hold <kbd>SPACE</kbd> or <kbd>Click & Hold</kbd> to charge. Release before it overloads!</p>
+
+        <!-- Etkileşimli Alan / The Interactive Core -->
+        <div id="pulse-target" class="pulse-circle" role="button" aria-label="Hold to charge system" tabindex="0">
+            <span id="feedback-text">HOLD</span>
+        </div>
+
+        <!-- Karşılaştırma Modu Seçici (Comparison Toggle) -->
+        <div class="controls">
+            <label>
+                <input type="checkbox" id="mode-toggle"> Enable Numeric Mode (Comparison A)
+            </label>
+            <button id="reset-btn">Reset State</button>
+        </div>
+
+        <!-- Sayısal Mod için gösterge -->
+        <div id="numeric-display" class="hidden">Load: <span id="load-value">0</span>%</div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
