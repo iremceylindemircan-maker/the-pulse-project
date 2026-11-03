@@ -1,0 +1,124 @@
+/* Genel Stil ve Yerleşim */
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #0f1115;
+    color: #f0f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    user-select: none;
+}
+
+.container {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+h1 {
+    font-size: 1.8rem;
+    letter-spacing: 2px;
+    margin: 0;
+    color: #8ab4f8;
+}
+
+.instruction {
+    color: #9aa0a6;
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+}
+
+kbd {
+    background: #303134;
+    border: 1px solid #5f6368;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-family: monospace;
+    color: #e8eaed;
+}
+
+/* Merkezdeki Etkileşim Alanı (Pulse Circle) */
+.pulse-circle {
+    width: 180px;
+    height: 180px;
+    background-color: #1f2229;
+    border: 4px solid #3c4043;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.1s ease, border-color 0.2s ease, background-color 0.2s ease;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    outline: none;
+}
+
+.pulse-circle:focus-visible {
+    box-shadow: 0 0 0 4px #8ab4f8;
+}
+
+#feedback-text {
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #bdc1c6;
+}
+
+/* Kontroller ve Butonlar */
+.controls {
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+}
+
+.controls label {
+    font-size: 0.85rem;
+    color: #9aa0a6;
+    cursor: pointer;
+}
+
+#reset-btn {
+    background: #303134;
+    color: #e8eaed;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: background 0.2s;
+}
+
+#reset-btn:hover {
+    background: #3c4043;
+}
+
+/* Gizleme Sınıfı */
+.hidden {
+    display: none;
+}
+
+#numeric-display {
+    font-family: monospace;
+    font-size: 1.1rem;
+    color: #f28b82;
+}
+
+/* Titreşim Animasyonu (State Feedback için) */
+@keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    20% { transform: translate(-2px, 0px) rotate(-1deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    60% { transform: translate(-1px, 2px) rotate(0deg); }
+    80% { transform: translate(-2px, -1px) rotate(1deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+}
+
+.shaking {
+    animation: shake 0.15s infinite;
+}
